@@ -19,6 +19,8 @@ A native macos keyboard-driven mouse click tool.
 
 ## Usage
 
+> only supports mouse 1 at the moment
+
 1. Press the hotkey (default: `Cmd+Option+G`) to show the grid
 2. Type 2 letters to select a big cell
 3. Type 1 letter to click at that position in the mini grid
