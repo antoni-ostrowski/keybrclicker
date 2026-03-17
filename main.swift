@@ -6,6 +6,55 @@ let HIDE_DELAY_US: useconds_t = 0        // Delay after hiding grid
 let FOCUS_DELAY_US: useconds_t = 0       // Delay after activating previous app
 let CLICK_DELAY_US: useconds_t = 0       // Delay between mouse down/up
 
+// MARK: - Config Path
+func getConfigURL() -> URL {
+    let homeDir = FileManager.default.homeDirectoryForCurrentUser
+    return homeDir.appendingPathComponent(".config/keybrclicker/config.json")
+}
+
+func createDefaultLayoutConfig() -> LayoutConfig {
+    let defaultHotkey = HotkeyConfig(modifiers: ["cmd", "option"], key: "g")
+    return LayoutConfig(
+        hotkey: defaultHotkey,
+        homeRow: ["A", "S", "D", "F", "G", "H", "J", "K", "L", ";"],
+        allKeys: [
+            ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+            ["A", "S", "D", "F", "G", "H", "J", "K", "L", ";"],
+            ["Z", "X", "C", "V", "B", "N", "M", ",", ".", "/"]
+        ]
+    )
+}
+
+func ensureConfigExists() {
+    let configURL = getConfigURL()
+    let fileManager = FileManager.default
+    
+    let configDir = configURL.deletingLastPathComponent()
+    
+    if !fileManager.fileExists(atPath: configDir.path) {
+        do {
+            try fileManager.createDirectory(at: configDir, withIntermediateDirectories: true)
+            print("Created config directory: \(configDir.path)")
+        } catch {
+            print("ERROR: Failed to create config directory: \(error)")
+            return
+        }
+    }
+    
+    if !fileManager.fileExists(atPath: configURL.path) {
+        do {
+            let defaultConfig = createDefaultLayoutConfig()
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+            let data = try encoder.encode(defaultConfig)
+            try data.write(to: configURL)
+            print("Created default config at: \(configURL.path)")
+        } catch {
+            print("ERROR: Failed to create default config: \(error)")
+        }
+    }
+}
+
 struct HotkeyConfig: Codable {
     let modifiers: [String]
     let key: String
@@ -136,6 +185,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         print("KeybrClicker starting...")
         NSApp.setActivationPolicy(.accessory)
         
+        ensureConfigExists()
         loadGlobalConfig()
         
         let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
@@ -175,20 +225,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func loadGlobalConfig() {
-        let configPath = Bundle.main.bundlePath + "/layout.json"
+        let configURL = getConfigURL()
         let fileManager = FileManager.default
         
-        guard fileManager.fileExists(atPath: configPath) else {
-            print("ERROR: layout.json not found at \(configPath), using defaults")
+        guard fileManager.fileExists(atPath: configURL.path) else {
+            print("ERROR: config.json not found at \(configURL.path), using defaults")
             return
         }
         
         do {
-            let data = try Data(contentsOf: URL(fileURLWithPath: configPath))
+            let data = try Data(contentsOf: configURL)
             globalConfig = try JSONDecoder().decode(LayoutConfig.self, from: data)
             print("Loaded config with hotkey: \(globalConfig?.hotkey.modifiers.joined(separator: "+") ?? "")+\(globalConfig?.hotkey.key ?? "")")
         } catch {
-            print("ERROR: Failed to load layout.json: \(error)")
+            print("ERROR: Failed to load config.json: \(error)")
         }
     }
     
@@ -284,42 +334,22 @@ class GridView: NSView {
     }
     
     func loadConfig() {
-        let configPath = Bundle.main.bundlePath + "/layout.json"
+        let configURL = getConfigURL()
         let fileManager = FileManager.default
         
-        guard fileManager.fileExists(atPath: configPath) else {
-            print("ERROR: layout.json not found at \(configPath)")
-            let defaultHotkey = HotkeyConfig(modifiers: ["cmd", "option"], key: "g")
-            let defaultConfig = LayoutConfig(
-                hotkey: defaultHotkey,
-                homeRow: ["A", "S", "D", "F", "G", "H", "J", "K", "L", ";"],
-                allKeys: [
-                    ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
-                    ["A", "S", "D", "F", "G", "H", "J", "K", "L", ";"],
-                    ["Z", "X", "C", "V", "B", "N", "M", ",", ".", "/"]
-                ]
-            )
-            self.config = defaultConfig
+        guard fileManager.fileExists(atPath: configURL.path) else {
+            print("ERROR: config.json not found at \(configURL.path)")
+            self.config = createDefaultLayoutConfig()
             return
         }
         
         do {
-            let data = try Data(contentsOf: URL(fileURLWithPath: configPath))
+            let data = try Data(contentsOf: configURL)
             self.config = try JSONDecoder().decode(LayoutConfig.self, from: data)
             print("Loaded layout config: \(config.homeRow.count) columns, \(config.flattenedKeys.count) rows")
         } catch {
-            print("ERROR: Failed to load layout.json: \(error)")
-            let defaultHotkey = HotkeyConfig(modifiers: ["cmd", "option"], key: "g")
-            let defaultConfig = LayoutConfig(
-                hotkey: defaultHotkey,
-                homeRow: ["A", "S", "D", "F", "G", "H", "J", "K", "L", ";"],
-                allKeys: [
-                    ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
-                    ["A", "S", "D", "F", "G", "H", "J", "K", "L", ";"],
-                    ["Z", "X", "C", "V", "B", "N", "M", ",", ".", "/"]
-                ]
-            )
-            self.config = defaultConfig
+            print("ERROR: Failed to load config.json: \(error)")
+            self.config = createDefaultLayoutConfig()
         }
     }
     
