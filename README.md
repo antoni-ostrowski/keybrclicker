@@ -2,9 +2,7 @@
 
 A native macos keyboard-driven mouse click tool.
 
-
 https://github.com/user-attachments/assets/cdaeb2cc-6761-42ca-bf39-3e826ca67a42
-
 
 > i couldn't find an OSS tool like this so i decided to make my own, vibecoded with opencode (glm-5).
 
@@ -31,7 +29,7 @@ https://github.com/user-attachments/assets/cdaeb2cc-6761-42ca-bf39-3e826ca67a42
 
 ## Configuration
 
-Program reads config from the same directory its located in. Edit `layout.json` to customize:
+Config is stored at `~/.config/keybrclicker/config.json`. A default config is created automatically on first run if it doesn't exist.
 
 ### Hotkey
 
