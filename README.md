@@ -6,6 +6,9 @@ https://github.com/user-attachments/assets/cdaeb2cc-6761-42ca-bf39-3e826ca67a42
 
 > i couldn't find an OSS tool like this so i decided to make my own, vibecoded with opencode (glm-5).
 
+# Getting Started
+Download binary from [latest release](https://github.com/antoni-ostrowski/keybrclicker/releases).
+
 ## Building
 
 ```bash
