@@ -211,6 +211,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
+func getMouseScreen() -> NSScreen? {
+    let mouseLoc = NSEvent.mouseLocation
+    for screen in NSScreen.screens {
+        if screen.frame.contains(mouseLoc) {
+            return screen
+        }
+    }
+    return NSScreen.main
+}
+
 class GridWindow: NSWindow {
     var gridView: GridView!
     
@@ -234,8 +244,8 @@ class GridWindow: NSWindow {
     }
     
     func show() {
-        guard let screen = NSScreen.main else {
-            print("ERROR: No main screen found")
+        guard let screen = getMouseScreen() else {
+            print("ERROR: No screen found")
             return
         }
         gridView.previousApp = NSWorkspace.shared.frontmostApplication
@@ -620,8 +630,9 @@ class GridView: NSView {
         }
         
         let clickPoint = screenRect.origin
-        let screenHeight = NSScreen.main!.frame.height
-        let cgClickPoint = CGPoint(x: clickPoint.x, y: screenHeight - clickPoint.y)
+        
+        let globalMaxY = NSScreen.screens.map { $0.frame.maxY }.max() ?? NSScreen.main!.frame.height
+        let cgClickPoint = CGPoint(x: clickPoint.x, y: globalMaxY - clickPoint.y)
         
         print("=== CLICK DEBUG ===")
         print("Big cell: \(bigCell), Mini key: \(miniKey)")
