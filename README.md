@@ -39,21 +39,19 @@ Config is stored at `~/.config/keybrclicker/config.json`. A default config is cr
 
 ### Hotkeys
 
-Define multiple hotkeys, each with its own mouse button and persistence setting:
+Define multiple hotkeys, each with its own mouse button:
 
 ```json
 "hotkeys": [
   {
     "modifiers": ["cmd", "option"],
     "key": "g",
-    "mouseButton": "left",
-    "persistent": false
+    "mouseButton": "left"
   },
   {
     "modifiers": ["cmd", "option", "shift"],
     "key": "g",
-    "mouseButton": "right",
-    "persistent": true
+    "mouseButton": "right"
   }
 ]
 ```
@@ -63,9 +61,6 @@ Define multiple hotkeys, each with its own mouse button and persistence setting:
 - `modifiers`: Array of modifier keys (see below)
 - `key`: Single key to trigger the hotkey (see below)
 - `mouseButton`: `"left"`, `"right"`, or `"middle"`
-- `persistent`: If `true`, grid stays active after each click for rapid chaining. Press `Escape` to exit.
-
-**Persistent Mode:** When enabled, the grid reappears immediately after each click, allowing fast consecutive clicks without re-triggering the hotkey.
 
 **Available modifiers:**
 
@@ -84,9 +79,9 @@ Define multiple hotkeys, each with its own mouse button and persistence setting:
 
 **Examples:**
 
-- Left click, normal: `{"modifiers": ["cmd", "option"], "key": "g", "mouseButton": "left", "persistent": false}`
-- Right click, persistent: `{"modifiers": ["cmd", "option", "shift"], "key": "g", "mouseButton": "right", "persistent": true}`
-- Middle click: `{"modifiers": ["cmd", "option"], "key": "m", "mouseButton": "middle", "persistent": false}`
+- Left click: `{"modifiers": ["cmd", "option"], "key": "g", "mouseButton": "left"}`
+- Right click: `{"modifiers": ["cmd", "option", "shift"], "key": "g", "mouseButton": "right"}`
+- Middle click: `{"modifiers": ["cmd", "option"], "key": "m", "mouseButton": "middle"}`
 
 ### Keyboard Layout
 
