@@ -22,8 +22,7 @@ func createDefaultLayoutConfig() -> LayoutConfig {
     let defaultHotkey = HotkeyConfig(
         modifiers: ["cmd", "option"],
         key: "g",
-        mouseButton: .left,
-        persistent: false
+        mouseButton: .left
     )
     return LayoutConfig(
         hotkeys: [defaultHotkey],
@@ -68,7 +67,6 @@ struct HotkeyConfig: Codable {
     let modifiers: [String]
     let key: String
     let mouseButton: MouseButton
-    let persistent: Bool
     
     func getModifierFlags() -> NSEvent.ModifierFlags {
         var flags: NSEvent.ModifierFlags = []
@@ -233,7 +231,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             print("KeybrClicker ready. Registered hotkeys:")
             for (index, hotkey) in config.hotkeys.enumerated() {
                 let mods = hotkey.modifiers.joined(separator: "+")
-                print("  [\(index)] \(mods.uppercased())+\(hotkey.key.uppercased()) →\(hotkey.mouseButton.rawValue) click\(hotkey.persistent ? " (persistent)" : "")")
+                print("  [\(index)] \(mods.uppercased())+\(hotkey.key.uppercased()) → \(hotkey.mouseButton.rawValue) click")
             }
         } else {
             print("KeybrClicker ready.")
@@ -322,7 +320,7 @@ class GridWindow: NSWindow {
         gridView.previousApp = NSWorkspace.shared.frontmostApplication
         gridView.activeHotkey = hotkey
         print("Stored previous app: \(gridView.previousApp?.localizedName ?? "nil")")
-        print("Active hotkey: \(hotkey.mouseButton.rawValue) click, persistent: \(hotkey.persistent)")
+        print("Active hotkey: \(hotkey.mouseButton.rawValue) click")
         setFrame(screen.frame, display: true)
         makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
@@ -689,14 +687,11 @@ class GridView: NSView {
         let cgClickPoint = CGPoint(x: clickPoint.x, y: globalMaxY - clickPoint.y)
         
         let mouseButton = activeHotkey?.mouseButton ?? .left
-        let isPersistent = activeHotkey?.persistent ?? false
-        
-        let savedHotkey = activeHotkey
         
         print("=== CLICK DEBUG ===")
         print("Big cell: \(bigCell), Mini key: \(miniKey)")
         print("Click point (CG): (\(cgClickPoint.x), \(cgClickPoint.y))")
-        print("Mouse button: \(mouseButton.rawValue), Persistent: \(isPersistent)")
+        print("Mouse button: \(mouseButton.rawValue)")
         
         let source = CGEventSource(stateID: .hidSystemState)
         
@@ -738,8 +733,6 @@ class GridView: NSView {
         
         (window as? GridWindow)?.hide()
         
-        let gridView = self
-        
         DispatchQueue.global(qos: .userInteractive).async {
             usleep(HIDE_DELAY_US)
             
@@ -755,16 +748,6 @@ class GridView: NSView {
             upEvent.post(tap: .cgSessionEventTap)
             
             print("=== CLICK COMPLETE ===")
-            
-            if isPersistent {
-                DispatchQueue.main.async {
-                    gridView.activeHotkey = savedHotkey
-                    gridView.reset()
-                    if let window = gridView.window as? GridWindow {
-                        window.show(savedHotkey!)
-                    }
-                }
-            }
         }
     }
     
