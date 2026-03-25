@@ -555,9 +555,9 @@ class ScrollView: NSView {
         
         switch direction {
         case .up:
-            verticalScroll = -scrollAmount
-        case .down:
             verticalScroll = scrollAmount
+        case .down:
+            verticalScroll = -scrollAmount
         case .left:
             horizontalScroll = scrollAmount
         case .right:
